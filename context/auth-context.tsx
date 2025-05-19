@@ -31,12 +31,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [adminStatus, setAdminStatus] = useState("초기화되지 않음")
+  const [isAdmin, setIsAdmin] = useState(false)
 
   // 관리자 이메일 목록 (실제로는 Firestore에서 관리하거나 환경 변수로 설정)
   const adminEmails = ["admin@eie-gyeonggi.org", "admin2@eie-gyeonggi.org"]
 
-  // 현재 사용자가 관리자인지 확인
-  const isAdmin = user ? adminEmails.includes(user.email || "") : false
+  // 사용자의 관리자 여부 확인 함수
+  const checkIfUserIsAdmin = (currentUser: User | null) => {
+    if (!currentUser || !currentUser.email) {
+      console.log("관리자 확인: 사용자가 없거나 이메일이 없음")
+      setIsAdmin(false)
+      return false
+    }
+
+    const userEmail = currentUser.email.toLowerCase()
+    const isUserAdmin = adminEmails.includes(userEmail)
+
+    console.log("관리자 확인:", {
+      email: userEmail,
+      isAdmin: isUserAdmin,
+      adminEmails,
+      emailInList: adminEmails.includes(userEmail),
+    })
+
+    setIsAdmin(isUserAdmin)
+    return isUserAdmin
+  }
 
   useEffect(() => {
     // Firebase 인증 상태 변경 감지
@@ -44,22 +64,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(currentUser)
       setLoading(false)
 
-      // 관리자 상태 업데이트 (디버깅용)
+      // 관리자 상태 업데이트
       if (currentUser) {
         const email = currentUser.email || "이메일 없음"
-        const isUserAdmin = adminEmails.includes(email)
+        const isUserAdmin = checkIfUserIsAdmin(currentUser)
+        
         setAdminStatus(
           isUserAdmin
             ? `관리자 확인됨 (${email})`
             : `일반 사용자 (${email}), 관리자 이메일 목록: ${adminEmails.join(", ")}`,
         )
-        console.log("사용자 인증 상태:", {
-          email,
-          isAdmin: isUserAdmin,
-          adminEmails,
-        })
       } else {
         setAdminStatus("로그인되지 않음")
+        setIsAdmin(false)
       }
     })
 
@@ -70,14 +87,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // 로그인 함수
   const login = async (email: string, password: string) => {
     try {
-      await signInWithEmailAndPassword(auth, email, password)
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
+      const currentUser = userCredential.user
+      
       // 로그인 후 관리자 상태 즉시 업데이트
-      const isUserAdmin = adminEmails.includes(email)
+      const isUserAdmin = checkIfUserIsAdmin(currentUser)
+      
       setAdminStatus(
         isUserAdmin
           ? `관리자 확인됨 (${email})`
           : `일반 사용자 (${email}), 관리자 이메일 목록: ${adminEmails.join(", ")}`,
       )
+      
       console.log("로그인 성공:", { email, isAdmin: isUserAdmin })
     } catch (error) {
       console.error("로그인 오류:", error)
@@ -90,6 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await signOut(auth)
       setAdminStatus("로그아웃됨")
+      setIsAdmin(false)
     } catch (error) {
       console.error("로그아웃 오류:", error)
       throw error

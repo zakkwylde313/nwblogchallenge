@@ -7,7 +7,6 @@ import { getAllCampuses, getDashboardStats } from "@/lib/db"
 import AddCampusButton from "@/components/add-campus-button"
 import { Suspense } from "react"
 import LoadingSpinner from "@/components/loading-spinner"
-import AdminToolsButton from "@/components/admin-tools-button"
 
 export default async function Home() {
   // Firestore에서 데이터 가져오기
@@ -31,7 +30,6 @@ export default async function Home() {
               <h1 className="text-xl sm:text-2xl font-bold text-gray-800 break-words">EiE 경기 서북부 협의회 블로그 챌린지</h1>
             </div>
             <div className="flex items-center space-x-2 self-end sm:self-auto">
-              <AdminToolsButton campuses={campuses} />
               <AdminLoginButton />
             </div>
           </div>
