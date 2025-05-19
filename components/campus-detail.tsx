@@ -141,16 +141,17 @@ export default function CampusDetail({ campus, posts }: CampusDetailProps) {
                     <span className="font-medium">#{post.number}</span>
                     <span className="text-sm text-gray-500">{formatDate(post.date)}</span>
                   </div>
-                  <h3 className="font-medium mb-2">
+                  <div className="mb-2">
                     <a
                       href={post.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:underline"
+                      className="text-blue-600 hover:underline line-clamp-1 font-medium"
+                      title={post.title}
                     >
                       {post.title}
                     </a>
-                  </h3>
+                  </div>
                   <div className="grid grid-cols-2 gap-2 text-sm mb-3">
                     <div className="flex items-center">
                       <FileText className="h-4 w-4 mr-1 text-gray-400" />
@@ -202,25 +203,25 @@ export default function CampusDetail({ campus, posts }: CampusDetailProps) {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[60px]">
                     번호
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[30%]">
                     제목
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[100px]">
                     글자 수
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[100px]">
                     이미지 수
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[100px]">
                     인정 여부
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[150px]">
                     등록일
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[120px]">
                     피드백
                   </th>
                 </tr>
@@ -229,12 +230,13 @@ export default function CampusDetail({ campus, posts }: CampusDetailProps) {
                 {posts.map((post) => (
                   <tr key={post.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{post.number}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-[200px]">
                       <a
                         href={post.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
+                        className="text-blue-600 hover:underline block truncate"
+                        title={post.title}
                       >
                         {post.title}
                       </a>
