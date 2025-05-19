@@ -90,14 +90,14 @@ export default function CampusDetail({ campus, posts }: CampusDetailProps) {
     <ErrorBoundary>
       <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
         <div className="p-6 border-b">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div>
               <h2 className="text-xl font-bold text-gray-800">{campus.name} 포스팅 목록</h2>
               <p className="text-gray-600">
                 인정 포스팅: {campus.validPosts} / 총 포스팅: {campus.totalPosts}
               </p>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <div>
                 <span className="mr-2">챌린지 상태:</span>
                 {campus.isCompleted ? (
@@ -131,7 +131,73 @@ export default function CampusDetail({ campus, posts }: CampusDetailProps) {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* 모바일에서는 카드 형태로, 데스크톱에서는 테이블 형태로 표시 */}
+        <div className="block md:hidden">
+          {posts.length > 0 ? (
+            <div className="divide-y divide-gray-200">
+              {posts.map((post) => (
+                <div key={post.id} className="p-4 hover:bg-gray-50">
+                  <div className="flex justify-between mb-2">
+                    <span className="font-medium">#{post.number}</span>
+                    <span className="text-sm text-gray-500">{formatDate(post.date)}</span>
+                  </div>
+                  <h3 className="font-medium mb-2">
+                    <a
+                      href={post.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      {post.title}
+                    </a>
+                  </h3>
+                  <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+                    <div className="flex items-center">
+                      <FileText className="h-4 w-4 mr-1 text-gray-400" />
+                      {post.wordCount.toLocaleString()}자
+                    </div>
+                    <div className="flex items-center">
+                      <ImageIcon className="h-4 w-4 mr-1 text-gray-400" />
+                      {post.imageCount}장
+                    </div>
+                    <div>
+                      {post.isValid ? (
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                          <Check className="h-4 w-4 mr-1" /> 인정
+                        </span>
+                      ) : (
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                          <X className="h-4 w-4 mr-1" /> 불인정
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex space-x-4">
+                    <button
+                      onClick={() => handleFeedbackView(post)}
+                      className="text-blue-600 hover:text-blue-800 flex items-center"
+                    >
+                      <MessageSquare className="h-4 w-4 mr-1" /> 피드백 보기
+                    </button>
+                    {isAdmin && (
+                      <button
+                        onClick={() => handleFeedbackEdit(post)}
+                        className="text-green-600 hover:text-green-800 flex items-center"
+                      >
+                        <MessageSquare className="h-4 w-4 mr-1" /> 피드백 작성
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-8 text-center text-gray-500">아직 등록된 포스트가 없습니다.</div>
+          )}
+        </div>
+
+        {/* 데스크톱 테이블 뷰 */}
+        <div className="hidden md:block overflow-x-auto">
           {posts.length > 0 ? (
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">

@@ -7,8 +7,6 @@ import { getAllCampuses, getDashboardStats } from "@/lib/db"
 import AddCampusButton from "@/components/add-campus-button"
 import { Suspense } from "react"
 import LoadingSpinner from "@/components/loading-spinner"
-import InitDataButton from "@/components/init-data-button"
-import AdminDebugPanel from "@/components/admin-debug-panel"
 import AdminToolsButton from "@/components/admin-tools-button"
 
 export default async function Home() {
@@ -24,16 +22,18 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow">
-        <div className="container mx-auto px-4 py-6 flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <div className="bg-blue-600 text-white p-2 rounded-md">
-              <BookOpen className="h-6 w-6" />
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-3 sm:space-y-0">
+            <div className="flex items-center space-x-3">
+              <div className="bg-blue-600 text-white p-2 rounded-md">
+                <BookOpen className="h-6 w-6" />
+              </div>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-800 break-words">EiE 경기 서북부 협의회 블로그 챌린지</h1>
             </div>
-            <h1 className="text-2xl font-bold text-gray-800">EiE 경기 서북부 협의회 블로그 챌린지</h1>
-          </div>
-          <div className="flex items-center space-x-2">
-            <AdminToolsButton campuses={campuses} />
-            <AdminLoginButton />
+            <div className="flex items-center space-x-2 self-end sm:self-auto">
+              <AdminToolsButton campuses={campuses} />
+              <AdminLoginButton />
+            </div>
           </div>
         </div>
       </header>
@@ -41,9 +41,9 @@ export default async function Home() {
       <main className="container mx-auto px-4 py-8">
         {/* 카운트다운 타이머 */}
         <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-lg p-6 mb-8 text-white">
-          <div className="flex flex-col md:flex-row justify-between items-center">
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div>
-              <h2 className="text-2xl font-bold mb-2">챌린지 기간 : 2025년 05월 10일 ~ 2025년 05월 31일</h2>
+              <h2 className="text-xl sm:text-2xl font-bold mb-2 text-center md:text-left">챌린지 기간 : 2025년 05월 10일 ~ 2025년 05월 31일</h2>
             </div>
             <CountdownTimer targetDate={challengeEndDate} />
           </div>
@@ -97,7 +97,7 @@ export default async function Home() {
 
         {/* 캠퍼스 테이블 */}
         <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
-          <div className="p-6 border-b flex justify-between items-center">
+          <div className="p-6 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
             <div>
               <h2 className="text-xl font-bold text-gray-800">참가 캠퍼스 현황</h2>
               <p className="text-gray-600">각 캠퍼스의 블로그 챌린지 진행 상황을 확인하세요</p>
@@ -115,12 +115,6 @@ export default async function Home() {
           <p>© 2025 EiE 경기 서북부 협의회. All rights reserved.</p>
         </div>
       </footer>
-
-      {/* 샘플 데이터 생성 버튼 */}
-      <InitDataButton />
-
-      {/* 관리자 디버그 패널 */}
-      <AdminDebugPanel />
     </div>
   )
 }

@@ -59,14 +59,10 @@ export default async function CampusPage(props: CampusPageProps) {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <header className="bg-white shadow">
         <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <Link href="/" className="text-blue-600 hover:underline flex items-center mb-2">
-                <ArrowLeft className="mr-2 h-4 w-4" /> 메인 페이지로 돌아가기
-              </Link>
-              <h1 className="text-2xl font-bold text-gray-800">{serializedCampus.name} 블로그 포스팅 현황</h1>
-            </div>
-          </div>
+          <Link href="/" className="text-blue-600 hover:underline flex items-center mb-2">
+            <ArrowLeft className="mr-2 h-4 w-4" /> 메인 페이지로 돌아가기
+          </Link>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-800 break-words">{serializedCampus.name} 블로그 포스팅 현황</h1>
         </div>
       </header>
 
