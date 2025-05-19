@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { MessageSquare, Check, X, ImageIcon, FileText, PlusCircle, RefreshCw } from "lucide-react"
+import { MessageSquare, Check, X, ImageIcon, FileText, PlusCircle, RefreshCw, AlertCircle } from "lucide-react"
 import FeedbackModal from "@/components/feedback-modal"
 import { useAuth } from "@/context/auth-context"
 import { updateFeedback } from "@/app/actions"
@@ -185,6 +185,17 @@ export default function CampusDetail({ campus, posts }: CampusDetailProps) {
                         </span>
                       )}
                     </div>
+                    <div>
+                      {post.feedback ? (
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                          <MessageSquare className="h-4 w-4 mr-1" /> 피드백 있음
+                        </span>
+                      ) : (
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                          <AlertCircle className="h-4 w-4 mr-1" /> 피드백 없음
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div className="flex space-x-4">
                     <button
@@ -231,6 +242,9 @@ export default function CampusDetail({ campus, posts }: CampusDetailProps) {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[100px]">
                     인정 여부
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[100px]">
+                    피드백 상태
+                  </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[150px]">
                     등록일
                   </th>
@@ -274,6 +288,17 @@ export default function CampusDetail({ campus, posts }: CampusDetailProps) {
                       ) : (
                         <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
                           <X className="h-4 w-4 mr-1" /> 불인정
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {post.feedback ? (
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                          <MessageSquare className="h-4 w-4 mr-1" /> 있음
+                        </span>
+                      ) : (
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                          <AlertCircle className="h-4 w-4 mr-1" /> 없음
                         </span>
                       )}
                     </td>
