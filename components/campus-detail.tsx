@@ -1,0 +1,246 @@
+"use client"
+
+import { useState } from "react"
+import { MessageSquare, Check, X, ImageIcon, FileText, PlusCircle, List } from "lucide-react"
+import FeedbackModal from "@/components/feedback-modal"
+import { useAuth } from "@/context/auth-context"
+import { updateFeedback } from "@/app/actions"
+import AddPostModal from "@/components/add-post-modal"
+import PostListModal from "@/components/post-list-modal"
+import type { Campus, Post } from "@/lib/db"
+import ErrorBoundary from "@/components/error-boundary"
+
+interface CampusDetailProps {
+  campus: Campus
+  posts: Post[]
+}
+
+export default function CampusDetail({ campus, posts }: CampusDetailProps) {
+  const { isAdmin, user } = useAuth()
+  const [feedbackModalOpen, setFeedbackModalOpen] = useState(false)
+  const [addPostModalOpen, setAddPostModalOpen] = useState(false)
+  const [postListModalOpen, setPostListModalOpen] = useState(false)
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null)
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false)
+
+  const handleFeedbackView = (post: Post) => {
+    setSelectedPost(post)
+    setFeedbackModalOpen(true)
+  }
+
+  const handleFeedbackEdit = (post: Post) => {
+    if (!isAdmin) return
+    setSelectedPost(post)
+    setFeedbackModalOpen(true)
+  }
+
+  const handleFeedbackSave = async (feedback: string) => {
+    if (!selectedPost) return
+
+    setFeedbackSubmitting(true)
+
+    const formData = new FormData()
+    formData.append("id", selectedPost.id)
+    formData.append("feedback", feedback)
+    formData.append("campusId", campus.id)
+
+    try {
+      const result = await updateFeedback(formData)
+
+      if (result.error) {
+        console.error(result.error)
+        alert(result.error)
+      } else {
+        setFeedbackModalOpen(false)
+      }
+    } catch (error) {
+      console.error("피드백 저장 오류:", error)
+      alert("피드백 저장 중 오류가 발생했습니다.")
+    } finally {
+      setFeedbackSubmitting(false)
+    }
+  }
+
+  // 날짜 포맷팅 함수
+  const formatDate = (timestamp: any) => {
+    if (!timestamp) return "날짜 없음"
+
+    try {
+      // 문자열이거나 Timestamp 객체일 수 있음
+      const date = typeof timestamp === 'string' 
+        ? new Date(timestamp) 
+        : timestamp.toDate 
+          ? timestamp.toDate() 
+          : new Date(timestamp);
+          
+      return new Intl.DateTimeFormat("ko-KR", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(date)
+    } catch (err) {
+      console.error("날짜 변환 오류:", err, timestamp);
+      return "날짜 오류";
+    }
+  }
+
+  return (
+    <ErrorBoundary>
+      <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-8">
+        <div className="p-6 border-b">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-bold text-gray-800">{campus.name} 포스팅 목록</h2>
+              <p className="text-gray-600">
+                인정 포스팅: {campus.validPosts} / 총 포스팅: {campus.totalPosts}
+              </p>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div>
+                <span className="mr-2">챌린지 상태:</span>
+                {campus.isCompleted ? (
+                  <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">성공</span>
+                ) : (
+                  <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+                    도전 중
+                  </span>
+                )}
+              </div>
+
+              {isAdmin && (
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => setPostListModalOpen(true)}
+                    className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700"
+                  >
+                    <List className="h-4 w-4 mr-2" />
+                    포스트 목록
+                  </button>
+                  <button
+                    onClick={() => setAddPostModalOpen(true)}
+                    className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700"
+                  >
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    포스트 추가
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          {posts.length > 0 ? (
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    번호
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    제목
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    글자 수
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    이미지 수
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    인정 여부
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    등록일
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    피드백
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {posts.map((post) => (
+                  <tr key={post.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{post.number}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <a
+                        href={post.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        {post.title}
+                      </a>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div className="flex items-center">
+                        <FileText className="h-4 w-4 mr-1 text-gray-400" />
+                        {post.wordCount.toLocaleString()}자
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div className="flex items-center">
+                        <ImageIcon className="h-4 w-4 mr-1 text-gray-400" />
+                        {post.imageCount}장
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {post.isValid ? (
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                          <Check className="h-4 w-4 mr-1" /> 인정
+                        </span>
+                      ) : (
+                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                          <X className="h-4 w-4 mr-1" /> 불인정
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(post.date)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleFeedbackView(post)}
+                          className="text-blue-600 hover:text-blue-800 flex items-center"
+                        >
+                          <MessageSquare className="h-4 w-4 mr-1" /> 보기
+                        </button>
+                        {isAdmin && (
+                          <button
+                            onClick={() => handleFeedbackEdit(post)}
+                            className="text-green-600 hover:text-green-800 flex items-center"
+                          >
+                            <MessageSquare className="h-4 w-4 mr-1" /> 작성
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="p-8 text-center text-gray-500">아직 등록된 포스트가 없습니다.</div>
+          )}
+        </div>
+      </div>
+
+      {/* 피드백 모달 */}
+      {feedbackModalOpen && selectedPost && (
+        <FeedbackModal
+          post={selectedPost}
+          isAdmin={isAdmin}
+          isSubmitting={feedbackSubmitting}
+          onClose={() => setFeedbackModalOpen(false)}
+          onSave={handleFeedbackSave}
+        />
+      )}
+
+      {/* 포스트 추가 모달 */}
+      {addPostModalOpen && <AddPostModal campusId={campus.id} onClose={() => setAddPostModalOpen(false)} />}
+
+      {/* 포스트 목록 모달 */}
+      {postListModalOpen && <PostListModal campus={campus} onClose={() => setPostListModalOpen(false)} user={user} />}
+    </ErrorBoundary>
+  )
+}
