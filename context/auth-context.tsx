@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false)
 
   // 관리자 이메일 목록 (실제로는 Firestore에서 관리하거나 환경 변수로 설정)
-  const adminEmails = ["admin@eie-gyeonggi.org", "admin2@eie-gyeonggi.org"]
+  const adminEmails = ["admin@nwbc.com"]
 
   // 사용자의 관리자 여부 확인 함수
   const checkIfUserIsAdmin = (currentUser: User | null) => {
