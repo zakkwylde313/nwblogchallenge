@@ -1,14 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { MessageSquare, Check, X, ImageIcon, FileText, PlusCircle, List } from "lucide-react"
+import { MessageSquare, Check, X, ImageIcon, FileText, PlusCircle, RefreshCw } from "lucide-react"
 import FeedbackModal from "@/components/feedback-modal"
 import { useAuth } from "@/context/auth-context"
 import { updateFeedback } from "@/app/actions"
 import AddPostModal from "@/components/add-post-modal"
-import PostListModal from "@/components/post-list-modal"
 import type { Campus, Post } from "@/lib/db"
 import ErrorBoundary from "@/components/error-boundary"
+import { useRouter } from "next/navigation"
 
 interface CampusDetailProps {
   campus: Campus
@@ -16,12 +16,13 @@ interface CampusDetailProps {
 }
 
 export default function CampusDetail({ campus, posts }: CampusDetailProps) {
+  const router = useRouter()
   const { isAdmin, user } = useAuth()
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false)
   const [addPostModalOpen, setAddPostModalOpen] = useState(false)
-  const [postListModalOpen, setPostListModalOpen] = useState(false)
   const [selectedPost, setSelectedPost] = useState<Post | null>(null)
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   const handleFeedbackView = (post: Post) => {
     setSelectedPost(post)
@@ -32,6 +33,17 @@ export default function CampusDetail({ campus, posts }: CampusDetailProps) {
     if (!isAdmin) return
     setSelectedPost(post)
     setFeedbackModalOpen(true)
+  }
+
+  const handleRefresh = () => {
+    setIsRefreshing(true)
+    // 현재 페이지 새로고침 (Next.js router 사용)
+    router.refresh()
+    // 실제 Next.js router.refresh()는 비동기지만 완료 이벤트를 받을 수 없으므로
+    // 잠시 후 새로고침 상태 해제
+    setTimeout(() => {
+      setIsRefreshing(false)
+    }, 1000)
   }
 
   const handleFeedbackSave = async (feedback: string) => {
@@ -112,11 +124,12 @@ export default function CampusDetail({ campus, posts }: CampusDetailProps) {
               {isAdmin && (
                 <div className="flex space-x-2">
                   <button
-                    onClick={() => setPostListModalOpen(true)}
-                    className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700"
+                    onClick={handleRefresh}
+                    className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 disabled:opacity-50"
+                    disabled={isRefreshing}
                   >
-                    <List className="h-4 w-4 mr-2" />
-                    포스트 목록
+                    <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                    {isRefreshing ? '새로고침 중...' : '새로고침'}
                   </button>
                   <button
                     onClick={() => setAddPostModalOpen(true)}
@@ -306,9 +319,6 @@ export default function CampusDetail({ campus, posts }: CampusDetailProps) {
 
       {/* 포스트 추가 모달 */}
       {addPostModalOpen && <AddPostModal campusId={campus.id} onClose={() => setAddPostModalOpen(false)} />}
-
-      {/* 포스트 목록 모달 */}
-      {postListModalOpen && <PostListModal campus={campus} onClose={() => setPostListModalOpen(false)} user={user} />}
     </ErrorBoundary>
   )
 }

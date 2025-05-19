@@ -1,3 +1,9 @@
+/**
+ * 현재 미사용 모듈: campus-detail.tsx에서 "포스트 목록" 버튼을 제거하여 더 이상 사용되지 않음
+ * 로컬 스크립트로 포스트를 추가하는 방식으로 변경되어 이 모달은 필요하지 않게 됨
+ * 참고용으로 코드는
+ * 유지되지만 현재 UI에서는 접근할 수 없음
+ */
 "use client"
 
 import { useState, useEffect } from "react"
