@@ -24,6 +24,17 @@ export default function CampusDetail({ campus, posts }: CampusDetailProps) {
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false)
   const [isRefreshing, setIsRefreshing] = useState(false)
 
+  // 최신 등록일 순으로 정렬
+  const sortedPosts = [...posts].sort((a, b) => {
+    const getDate = (d: any) => {
+      if (!d) return 0;
+      if (typeof d === 'string') return new Date(d).getTime();
+      if (d.toDate) return d.toDate().getTime();
+      return new Date(d).getTime();
+    };
+    return getDate(b.date) - getDate(a.date);
+  });
+
   const handleFeedbackView = (post: Post) => {
     setSelectedPost(post)
     setFeedbackModalOpen(true)
@@ -146,12 +157,12 @@ export default function CampusDetail({ campus, posts }: CampusDetailProps) {
 
         {/* 모바일에서는 카드 형태로, 데스크톱에서는 테이블 형태로 표시 */}
         <div className="block md:hidden">
-          {posts.length > 0 ? (
+          {sortedPosts.length > 0 ? (
             <div className="divide-y divide-gray-200">
-              {posts.map((post) => (
+              {sortedPosts.map((post, idx) => (
                 <div key={post.id} className="p-4 hover:bg-gray-50">
                   <div className="flex justify-between mb-2">
-                    <span className="font-medium">#{post.number}</span>
+                    <span className="font-medium">#{idx + 1}</span>
                     <span className="text-sm text-gray-500">{formatDate(post.date)}</span>
                   </div>
                   <div className="mb-2">
@@ -223,7 +234,7 @@ export default function CampusDetail({ campus, posts }: CampusDetailProps) {
 
         {/* 데스크톱 테이블 뷰 */}
         <div className="hidden md:block overflow-x-auto">
-          {posts.length > 0 ? (
+          {sortedPosts.length > 0 ? (
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -254,9 +265,9 @@ export default function CampusDetail({ campus, posts }: CampusDetailProps) {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {posts.map((post) => (
+                {sortedPosts.map((post, idx) => (
                   <tr key={post.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{post.number}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{idx + 1}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-[200px]">
                       <a
                         href={post.url}
