@@ -1,12 +1,19 @@
+"use client"
+
 import Link from "next/link"
-import { ExternalLink, ArrowRight, AlertCircle } from "lucide-react"
+import { ExternalLink, ArrowRight, AlertCircle, Trash2 } from "lucide-react"
 import type { Campus } from "@/lib/db"
+import { useAuth } from "@/context/auth-context"
+import { useRouter } from "next/navigation"
 
 interface CampusTableProps {
   campuses: (Campus & { rank: number })[]
 }
 
 export default function CampusTable({ campuses }: CampusTableProps) {
+  const { isAdmin } = useAuth();
+  const router = useRouter();
+
   // 날짜 포맷팅 함수
   const formatDate = (timestamp: any) => {
     if (!timestamp) return "날짜 없음"
@@ -23,6 +30,22 @@ export default function CampusTable({ campuses }: CampusTableProps) {
 
   // 데이터 로딩 상태 확인
   console.log("CampusTable 렌더링, 캠퍼스 수:", campuses.length)
+
+  // 캠퍼스 삭제 핸들러
+  const handleDelete = async (campusId: string, campusName: string) => {
+    if (!window.confirm(`정말로 캠퍼스 "${campusName}"을(를) 삭제하시겠습니까?\n(해당 캠퍼스의 모든 포스트도 함께 삭제됩니다)`)) return;
+    try {
+      const res = await fetch(`/api/campus/delete`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: campusId }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      router.refresh();
+    } catch (err) {
+      alert(`삭제 중 오류: ${err instanceof Error ? err.message : err}`);
+    }
+  };
 
   return (
     <div className="overflow-x-auto">
@@ -92,11 +115,20 @@ export default function CampusTable({ campuses }: CampusTableProps) {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {campus.lastPostDate ? formatDate(campus.lastPostDate) : "포스팅 없음"}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex items-center gap-2">
                   <Link href={`/campus/${campus.id}`} className="text-blue-600 hover:text-blue-900 flex items-center">
                     상세보기
                     <ArrowRight className="ml-1 h-4 w-4" />
                   </Link>
+                  {isAdmin && (
+                    <button
+                      title="캠퍼스 삭제"
+                      onClick={() => handleDelete(campus.id, campus.name)}
+                      className="ml-2 text-red-600 hover:text-red-800 flex items-center"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
