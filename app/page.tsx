@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { Award, BookOpen, Users } from "lucide-react"
 import CountdownTimer from "@/components/countdown-timer"
 import CampusTable from "@/components/campus-table"
