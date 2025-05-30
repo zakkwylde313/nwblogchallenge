@@ -14,8 +14,17 @@ export default async function Home() {
   // Firestore에서 데이터 가져오기
   const campusesPromise = getAllCampuses()
   const statsPromise = getDashboardStats()
-
   const [campuses, stats] = await Promise.all([campusesPromise, statsPromise])
+
+  // stats.topCampuses는 postingCount 기준 내림차순 정렬된 배열이라고 가정
+  const sorted = stats.topCampuses;
+
+  // 컷오프 기준: 상위 2위의 postingCount 값
+  const cutoffCount = sorted.length >= 2 ? sorted[1].validPosts : (sorted[0]?.validPosts || 0);
+
+  const topWithTies = sorted.filter(campus => campus.validPosts >= cutoffCount);
+
+
 
   // 챌린지 마감일 (예: 2025년 6월 30일)
   const challengeEndDate = new Date("2025-05-31T14:59:59Z")
@@ -112,7 +121,7 @@ export default async function Home() {
 
       <footer className="bg-gray-800 text-white py-6">
         <div className="container mx-auto px-4 text-center">
-          <p>© 2025 EiE 경기 서북부 협의회. All rights reserved.</p>
+          <p>© 2025 EiE 경기 동·서북부 협의회. All rights reserved.</p>
         </div>
       </footer>
     </div>
