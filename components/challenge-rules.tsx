@@ -20,6 +20,10 @@ export default function ChallengeRules() {
             </li>
             <li className="flex items-start">
               <span className="font-medium mr-2">•</span>
+              <span>동률로 인해 챌린지 순위 TOP2가 3개 캠퍼스 이상일 경우 TOP2 현황에는 최근 포스팅 등록 순서로 2개 캠퍼스만 보여 집니다.</span>
+            </li>
+            <li className="flex items-start">
+              <span className="font-medium mr-2">•</span>
               <span>최종 순위는 인정 포스팅 수를 기준으로 결정되며, 포스팅 수가 동일한 경우 포스팅의 품질을 종합적으로 판단하여 결정됩니다.</span>
             </li>
           </ul>

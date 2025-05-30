@@ -479,18 +479,36 @@ export async function getDashboardStats() {
     })
 
     // TOP3 캠퍼스 - 단일 필드로만 정렬
-    const topCampusesQuery = query(campusesRef, orderBy("validPosts", "desc"), limit(2))
-    const topCampusesSnapshot = await getDocs(topCampusesQuery)
+     const snap = await getDocs(
+      query(
+        campusesRef,
+        orderBy("validPosts", "desc"),
+        limit(5)      // 5나 10 정도 여유 있게 잡아도 OK
+      )
+    )
 
-    const topCampuses: { id: string; name: string; validPosts: number }[] = []
-    topCampusesSnapshot.forEach((doc) => {
-      const campus = doc.data() as Campus
-      topCampuses.push({
+    // posting 수와 lastPostDate(밀리초) 함께 매핑
+    const list = snap.docs.map(doc => {
+      const c = doc.data() as Campus
+      return {
         id: doc.id,
-        name: campus.name,
-        validPosts: campus.validPosts,
-      })
+        name: c.name,
+        validPosts: c.validPosts,
+        // Timestamp → 밀리초로 변환. null이면 0
+        lastPostDate: c.lastPostDate?.toMillis() ?? 0
+      }
     })
+
+    // validPosts 내림차순, 동률이면 lastPostDate 내림차순
+    list.sort((a, b) => {
+      if (b.validPosts !== a.validPosts) return b.validPosts - a.validPosts
+      return b.lastPostDate - a.lastPostDate
+    })
+
+    // 그중 상위 2개만 잘라내기
+    const topCampuses = list
+      .slice(0, 2)
+      .map(({ id, name, validPosts }) => ({ id, name, validPosts }))
 
     return {
       totalCampuses,
