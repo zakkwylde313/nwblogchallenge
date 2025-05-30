@@ -29,7 +29,7 @@ export default async function Home() {
               <div className="bg-blue-600 text-white p-2 rounded-md">
                 <BookOpen className="h-6 w-6" />
               </div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-800 break-words">EiE 경기 서북부 협의회 블로그 챌린지</h1>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-800 break-words">EiE 경기 동·서북부 협의회 블로그 챌린지</h1>
             </div>
             <div className="flex items-center space-x-2 self-end sm:self-auto">
               <AdminLoginButton />
@@ -81,7 +81,7 @@ export default async function Home() {
                 <Award className="h-6 w-6 text-yellow-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">챌린지 순위 TOP3</p>
+                <p className="text-sm text-gray-500">챌린지 순위 TOP2</p>
                 <h3 className="text-lg font-bold">
                   {stats.topCampuses.length > 0
                     ? stats.topCampuses.map((campus) => campus.name).join(", ")

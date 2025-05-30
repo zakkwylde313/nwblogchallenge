@@ -479,7 +479,7 @@ export async function getDashboardStats() {
     })
 
     // TOP3 캠퍼스 - 단일 필드로만 정렬
-    const topCampusesQuery = query(campusesRef, orderBy("validPosts", "desc"), limit(3))
+    const topCampusesQuery = query(campusesRef, orderBy("validPosts", "desc"), limit(2))
     const topCampusesSnapshot = await getDocs(topCampusesQuery)
 
     const topCampuses: { id: string; name: string; validPosts: number }[] = []
