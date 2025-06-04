@@ -27,7 +27,7 @@ export default async function Home() {
 
 
   // 챌린지 마감일 (예: 2025년 6월 30일)
-  const challengeEndDate = new Date("2025-05-31T14:59:59Z")
+  const challengeEndDate = new Date("2025-07-08T14:59:59Z")
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -52,7 +52,7 @@ export default async function Home() {
         <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-lg p-6 mb-8 text-white">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold mb-2 text-center md:text-left">챌린지 기간 : 2025년 05월 10일 ~ 2025년 05월 31일</h2>
+              <h2 className="text-xl sm:text-2xl font-bold mb-2 text-center md:text-left">챌린지 기간 : 2025년 06월 09일 ~ 2025년 07월 08일</h2>
             </div>
             <CountdownTimer targetDate={challengeEndDate} />
           </div>

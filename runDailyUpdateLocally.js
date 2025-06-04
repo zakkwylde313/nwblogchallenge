@@ -102,8 +102,8 @@ function parseKoreanTime(dateString) {
 // --- 설정값 ---
 // 한국 시간(KST) 기준으로 설정 (UTC+9)
 // 한국시간 2025년 5월 1일 00:00:00는 UTC로 2025-04-30T15:00:00Z
-const CHALLENGE_START_DATE = new Date(process.env.CHALLENGE_START_DATE || '2025-05-09T15:00:00Z'); // 한국시간 2025년 5월 10일 0시
-const CHALLENGE_END_DATE = new Date(process.env.CHALLENGE_END_DATE || '2025-05-31T14:59:59Z');   // 한국시간 2025년 5월 31일 23시 59분 59초
+const CHALLENGE_START_DATE = new Date(process.env.CHALLENGE_START_DATE || '2025-06-08T15:00:00Z'); // 한국시간 2025년 5월 10일 0시
+const CHALLENGE_END_DATE = new Date(process.env.CHALLENGE_END_DATE || '2025-07-08T14:59:59Z');   // 한국시간 2025년 5월 31일 23시 59분 59초
 const POST_RECOGNITION_CRITERIA = {
   minCharCountNoSpaces: parseInt(process.env.MIN_CHAR_COUNT || '1000', 10),
   minImageCount: parseInt(process.env.MIN_IMAGE_COUNT || '3', 10),
