@@ -16,7 +16,7 @@ export default function ChallengeRules() {
             </li>
             <li className="flex items-start">
               <span className="font-medium mr-2">•</span>
-              <span>인정 포스팅 기준: 글자 수 1,000자 이상, 이미지 3장 이상을 모두 충족해야 합니다.</span>
+              <span>인정 포스팅 기준: 글자 수(공백 제외) 1,000자 이상, 이미지 3장 이상을 모두 충족해야 합니다.</span>
             </li>
             <li className="flex items-start">
               <span className="font-medium mr-2">•</span>
