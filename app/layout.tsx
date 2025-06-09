@@ -7,8 +7,8 @@ import { AuthProvider } from "@/context/auth-context"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "EiE 경기 서북부 협의회 블로그 챌린지",
-  description: "EiE 경기 서북부 협의회 소속 블로그들의 포스팅 챌린지 참여 현황",
+  title: "EiE 경기 동·서북부 협의회 블로그 챌린지",
+  description: "EiE 경기 동·서북부 협의회 소속 블로그들의 포스팅 챌린지 참여 현황",
     generator: 'v0.dev'
 }
 
