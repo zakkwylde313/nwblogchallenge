@@ -341,14 +341,17 @@ export async function createPost(data: Omit<Post, "id" | "createdAt" | "updatedA
 
 export async function updatePost(id: string, data: Partial<Omit<Post, "id" | "createdAt" | "updatedAt">>) {
   try {
+    console.log("updatePost 시작:", { id, data });
     const docRef = doc(db, "posts", id)
     const docSnap = await getDoc(docRef)
 
     if (!docSnap.exists()) {
+      console.error("포스트를 찾을 수 없음:", id);
       throw new Error("포스트를 찾을 수 없습니다.")
     }
 
     const currentData = docSnap.data() as Post
+    console.log("현재 포스트 데이터:", currentData);
 
     // 워드 카운트나 이미지 카운트가 변경된 경우 유효성 재계산
     let isValid = currentData.isValid
@@ -358,18 +361,44 @@ export async function updatePost(id: string, data: Partial<Omit<Post, "id" | "cr
       isValid = wordCount >= 1000 && imageCount >= 3
     }
 
-    await updateDoc(docRef, {
+    const updateData = {
       ...data,
       isValid,
       updatedAt: serverTimestamp(),
-    })
+    };
+    console.log("업데이트할 데이터:", updateData);
+
+    try {
+      await updateDoc(docRef, updateData)
+      console.log("포스트 업데이트 성공");
+    } catch (updateError) {
+      console.error("Firestore 업데이트 오류:", {
+        error: updateError,
+        code: (updateError as any)?.code,
+        message: (updateError as any)?.message,
+        details: (updateError as any)?.details
+      });
+      throw updateError;
+    }
 
     // 캠퍼스 정보 업데이트
-    await updateCampusPostStats(currentData.campusId)
+    try {
+      await updateCampusPostStats(currentData.campusId)
+      console.log("캠퍼스 통계 업데이트 성공");
+    } catch (statsError) {
+      console.error("캠퍼스 통계 업데이트 오류:", statsError);
+      // 통계 업데이트 실패는 전체 업데이트를 실패시키지 않음
+    }
 
     return true
   } catch (error) {
-    console.error(`포스트 ID ${id} 업데이트 오류:`, error)
+    console.error(`포스트 ID ${id} 업데이트 오류:`, {
+      error,
+      code: (error as any)?.code,
+      message: (error as any)?.message,
+      details: (error as any)?.details,
+      stack: error instanceof Error ? error.stack : undefined
+    });
     throw error
   }
 }
