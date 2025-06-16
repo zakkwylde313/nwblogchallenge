@@ -68,19 +68,34 @@ export default function CampusDetail({ campus, posts }: CampusDetailProps) {
     formData.append("campusId", campus.id)
 
     try {
+      console.log("피드백 저장 시도:", { 
+        postId: selectedPost.id, 
+        campusId: campus.id,
+        feedbackLength: feedback.length 
+      });
+
       const result = await updateFeedback(formData)
 
       if (result.error) {
-        console.error(result.error)
-        alert(result.error)
+        console.error("피드백 저장 실패:", result.error);
+        // 오류 메시지를 더 명확하게 표시
+        alert(result.error);
       } else {
-        setFeedbackModalOpen(false)
+        console.log("피드백 저장 성공");
+        setFeedbackModalOpen(false);
+        // 성공 메시지 표시
+        alert("피드백이 성공적으로 저장되었습니다.");
       }
     } catch (error) {
-      console.error("피드백 저장 오류:", error)
-      alert("피드백 저장 중 오류가 발생했습니다.")
+      // 예상치 못한 오류 처리
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("피드백 저장 중 예상치 못한 오류:", {
+        error,
+        message: errorMessage
+      });
+      alert(`피드백 저장 중 오류가 발생했습니다: ${errorMessage}`);
     } finally {
-      setFeedbackSubmitting(false)
+      setFeedbackSubmitting(false);
     }
   }
 

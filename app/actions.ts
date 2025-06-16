@@ -164,16 +164,52 @@ export async function updateFeedback(formData: FormData) {
     const campusId = formData.get("campusId") as string
 
     if (!id) {
-      return { error: "포스트 ID가 필요합니다." }
+      throw new Error("포스트 ID가 필요합니다.")
     }
 
-    await updatePost(id, { feedback })
+    if (!campusId) {
+      throw new Error("캠퍼스 ID가 필요합니다.")
+    }
 
-    revalidatePath(`/campus/${campusId}`)
-    return { success: true }
+    console.log("피드백 업데이트 시작:", { id, campusId, feedbackLength: feedback?.length });
+
+    try {
+      await updatePost(id, { feedback })
+      console.log("피드백 업데이트 성공");
+      revalidatePath(`/campus/${campusId}`)
+      return { success: true }
+    } catch (error) {
+      // Firestore 오류를 더 구체적으로 처리
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorCode = (error as any)?.code;
+      
+      console.error("피드백 업데이트 실패:", {
+        error,
+        code: errorCode,
+        message: errorMessage
+      });
+
+      // 권한 관련 오류인 경우
+      if (errorCode === 'permission-denied') {
+        throw new Error("피드백을 저장할 권한이 없습니다. 관리자로 로그인되어 있는지 확인해주세요.");
+      }
+      
+      // 문서를 찾을 수 없는 경우
+      if (errorCode === 'not-found') {
+        throw new Error("포스트를 찾을 수 없습니다.");
+      }
+
+      // 기타 오류
+      throw new Error(`피드백 업데이트 중 오류가 발생했습니다: ${errorMessage}`);
+    }
   } catch (error) {
-    console.error("피드백 업데이트 오류:", error)
-    return { error: "피드백 업데이트 중 오류가 발생했습니다." }
+    // 최종 오류 처리
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("피드백 업데이트 최종 오류:", {
+      error,
+      message: errorMessage
+    });
+    return { error: errorMessage }
   }
 }
 
