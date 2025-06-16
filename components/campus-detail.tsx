@@ -59,41 +59,75 @@ export default function CampusDetail({ campus, posts }: CampusDetailProps) {
 
   const handleFeedbackSave = async (postId: string, feedback: string) => {
     if (!user) {
+      console.error("사용자가 로그인되어 있지 않음");
       alert("로그인이 필요합니다.");
       return;
     }
 
     setFeedbackSubmitting(true);
     try {
-      console.log("피드백 저장 시도:", { 
+      console.log("피드백 저장 시작:", { 
         postId, 
         campusId: campus.id, 
         feedbackLength: feedback.length,
-        uid: user.uid 
+        uid: user.uid,
+        email: user.email,
+        isAnonymous: user.isAnonymous
       });
 
       // 현재 사용자의 ID 토큰 가져오기
-      const idToken = await user.getIdToken();
+      console.log("ID 토큰 요청 시작");
+      let idToken;
+      try {
+        idToken = await user.getIdToken();
+        console.log("ID 토큰 가져오기 성공:", { 
+          hasToken: !!idToken,
+          tokenLength: idToken?.length,
+          tokenPreview: idToken ? `${idToken.substring(0, 10)}...` : null
+        });
+      } catch (tokenError) {
+        console.error("ID 토큰 가져오기 실패:", {
+          error: tokenError,
+          code: (tokenError as any)?.code,
+          message: (tokenError as any)?.message
+        });
+        throw new Error("인증 토큰을 가져올 수 없습니다. 다시 로그인해주세요.");
+      }
       
+      if (!idToken) {
+        console.error("ID 토큰이 null 또는 undefined");
+        throw new Error("인증 토큰을 가져올 수 없습니다. 다시 로그인해주세요.");
+      }
+
       const formData = new FormData();
       formData.append("id", postId);
       formData.append("feedback", feedback);
       formData.append("campusId", campus.id);
       formData.append("authToken", idToken);
 
+      console.log("서버 액션 호출 시작");
       const result = await updateFeedback(formData);
       
       if (result.error) {
-        console.error("피드백 저장 실패:", result.error);
+        console.error("피드백 저장 실패:", {
+          error: result.error,
+          hasError: !!result.error
+        });
         alert(result.error);
         return;
       }
 
+      console.log("피드백 저장 성공");
       alert("피드백이 저장되었습니다.");
       // 피드백 모달 닫기
       setSelectedPost(null);
     } catch (error) {
-      console.error("피드백 저장 중 오류 발생:", error);
+      console.error("피드백 저장 중 오류 발생:", {
+        error,
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       alert(error instanceof Error ? error.message : "피드백 저장 중 오류가 발생했습니다.");
     } finally {
       setFeedbackSubmitting(false);
