@@ -1,9 +1,9 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { createCampus, updateCampus, deleteCampus, createPost, updatePost, deletePost } from "@/lib/db"
+import { createCampus, updateCampus, deleteCampus, createPost, deletePost } from "@/lib/db"
 import { Timestamp } from "firebase/firestore"
-import { adminAuth } from "@/lib/firebase-admin"
+import { adminAuth, adminDb } from "@/lib/firebase-admin"
 
 // 캠퍼스 관련 서버 액션
 export async function addCampus(formData: FormData) {
@@ -188,7 +188,12 @@ export async function updateFeedback(formData: FormData) {
     // 인증 토큰 검증
     let decodedToken;
     try {
-      console.log("토큰 검증 시도:", { tokenLength: authToken.length });
+      console.log("토큰 검증 시도:", { 
+        tokenLength: authToken.length,
+        tokenStart: authToken.substring(0, 50),
+        adminAuthExists: !!adminAuth,
+        adminAuthType: typeof adminAuth
+      });
       decodedToken = await adminAuth.verifyIdToken(authToken);
       console.log("인증 토큰 검증 성공:", { 
         uid: decodedToken.uid,
@@ -199,11 +204,14 @@ export async function updateFeedback(formData: FormData) {
     } catch (authError) {
       console.error("인증 토큰 검증 실패:", {
         error: authError,
+        errorName: authError?.name,
         code: (authError as any)?.code,
         message: (authError as any)?.message,
-        stack: (authError as any)?.stack
+        stack: (authError as any)?.stack,
+        codeDetails: (authError as any)?.codePrefix,
+        errorCode: (authError as any)?.errorInfo?.code
       });
-      throw new Error("인증이 유효하지 않습니다. 다시 로그인해주세요.");
+      throw new Error(`인증 실패: ${(authError as any)?.code || (authError as any)?.message || authError}`);
     }
 
     // 관리자 UID 목록
@@ -228,7 +236,12 @@ export async function updateFeedback(formData: FormData) {
     });
 
     try {
-      await updatePost(id, { feedback })
+      // Admin SDK로 직접 업데이트
+      const postRef = adminDb.collection('posts').doc(id)
+      await postRef.update({
+        feedback,
+        updatedAt: new Date()
+      })
       console.log("피드백 업데이트 성공");
       revalidatePath(`/campus/${campusId}`)
       return { success: true }
