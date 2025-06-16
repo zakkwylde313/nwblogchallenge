@@ -10,6 +10,15 @@ function initializeFirebaseAdmin() {
     const clientEmail = process.env.FIREBASE_CLIENT_EMAIL
     const privateKey = process.env.FIREBASE_PRIVATE_KEY
 
+    console.log("Firebase Admin SDK 환경 변수 확인:", {
+      hasProjectId: !!projectId,
+      hasClientEmail: !!clientEmail,
+      hasPrivateKey: !!privateKey,
+      projectId: projectId,
+      clientEmail: clientEmail,
+      privateKeyStart: privateKey?.substring(0, 50)
+    })
+
     // 환경 변수 검증
     if (!projectId || !clientEmail || !privateKey) {
       console.error("Firebase Admin SDK 환경 변수가 누락되었습니다:", {

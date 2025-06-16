@@ -109,11 +109,9 @@ export default function CampusDetail({ campus, posts }: CampusDetailProps) {
       const result = await updateFeedback(formData);
       
       if (result.error) {
-        console.error("피드백 저장 실패:", {
-          error: result.error,
-          hasError: !!result.error
-        });
-        alert(result.error);
+        console.error("피드백 저장 실패:", result.error);
+        console.error("피드백 저장 실패 상세:", JSON.stringify(result.error));
+        alert(`피드백 저장 실패: ${result.error}`);
         return;
       }
 
