@@ -5,7 +5,29 @@ import { getAuth } from "firebase-admin/auth"
 // Firebase Admin SDK 초기화 함수
 function initializeFirebaseAdmin() {
   try {
-    // 환경 변수 확인
+    // Base64 서비스 계정 키 사용 (Vercel용)
+    const serviceAccountKeyBase64 = process.env.FIREBASE_SERVICE_ACCOUNT_KEY_JSON_BASE64
+    
+    if (serviceAccountKeyBase64) {
+      console.log("Base64 서비스 계정 키 사용")
+      const serviceAccountKey = JSON.parse(Buffer.from(serviceAccountKeyBase64, 'base64').toString('utf8'))
+      
+      // 이미 초기화되었는지 확인
+      if (getApps().length > 0) {
+        console.log("Firebase Admin SDK가 이미 초기화되어 있습니다.")
+        return
+      }
+
+      // Firebase Admin SDK 초기화
+      initializeApp({
+        credential: cert(serviceAccountKey),
+      })
+
+      console.log("Firebase Admin SDK가 성공적으로 초기화되었습니다 (Base64).")
+      return
+    }
+
+    // 기존 방식 (로컬용)
     const projectId = process.env.FIREBASE_PROJECT_ID
     const clientEmail = process.env.FIREBASE_CLIENT_EMAIL
     const privateKey = process.env.FIREBASE_PRIVATE_KEY
@@ -82,26 +104,26 @@ try {
   // 초기화 실패해도 앱이 계속 실행되도록 함
 }
 
-// 인스턴스 내보내기
-let adminDb: any
-let adminAuth: any
-
-try {
-  adminDb = getFirestoreInstance()
-  adminAuth = getAuthInstance()
-} catch (error) {
-  console.error("Firebase Admin 서비스 초기화 오류:", error)
-  // 기본 객체 제공
-  adminDb = {
-    collection: () => {
+// 인스턴스 내보내기 (지연 초기화)
+export const adminDb = {
+  collection: (path: string) => {
+    try {
+      return getFirestore().collection(path)
+    } catch (error) {
+      console.error("Firestore 인스턴스 가져오기 오류:", error)
       throw new Error("Firestore가 초기화되지 않았습니다.")
-    },
-  }
-  adminAuth = {
-    verifyIdToken: () => {
-      throw new Error("Auth가 초기화되지 않았습니다.")
-    },
+    }
   }
 }
 
-export { adminDb, adminAuth }
+export const adminAuth = {
+  verifyIdToken: async (token: string) => {
+    try {
+      return await getAuth().verifyIdToken(token)
+    } catch (error) {
+      console.error("Auth 인스턴스 가져오기 오류:", error)
+      throw new Error("Auth가 초기화되지 않았습니다.")
+    }
+  }
+}
+
