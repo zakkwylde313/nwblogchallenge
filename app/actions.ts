@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { createCampus, updateCampus, deleteCampus, createPost, updatePost, deletePost } from "@/lib/db"
 import { Timestamp } from "firebase/firestore"
+import { adminAuth } from "@/lib/firebase-admin"
 
 // 캠퍼스 관련 서버 액션
 export async function addCampus(formData: FormData) {
@@ -162,6 +163,7 @@ export async function updateFeedback(formData: FormData) {
     const id = formData.get("id") as string
     const feedback = formData.get("feedback") as string
     const campusId = formData.get("campusId") as string
+    const authToken = formData.get("authToken") as string
 
     if (!id) {
       throw new Error("포스트 ID가 필요합니다.")
@@ -171,7 +173,35 @@ export async function updateFeedback(formData: FormData) {
       throw new Error("캠퍼스 ID가 필요합니다.")
     }
 
-    console.log("피드백 업데이트 시작:", { id, campusId, feedbackLength: feedback?.length });
+    if (!authToken) {
+      throw new Error("인증 토큰이 필요합니다.")
+    }
+
+    // 인증 토큰 검증
+    let decodedToken;
+    try {
+      decodedToken = await adminAuth.verifyIdToken(authToken);
+      console.log("인증 토큰 검증 성공:", { uid: decodedToken.uid });
+    } catch (authError) {
+      console.error("인증 토큰 검증 실패:", authError);
+      throw new Error("인증이 유효하지 않습니다. 다시 로그인해주세요.");
+    }
+
+    // 관리자 UID 목록
+    const adminUids = ['3c9sqD8PNOTrdiCCz0fqnC5EZln1', 'Fy8mL3P0axM6QnqMEPBKgpUvIDk2'];
+    
+    // 관리자 권한 확인
+    if (!adminUids.includes(decodedToken.uid)) {
+      console.error("관리자 권한 없음:", { uid: decodedToken.uid });
+      throw new Error("관리자 권한이 필요합니다.");
+    }
+
+    console.log("피드백 업데이트 시작:", { 
+      id, 
+      campusId, 
+      feedbackLength: feedback?.length,
+      uid: decodedToken.uid 
+    });
 
     try {
       await updatePost(id, { feedback })
@@ -186,7 +216,8 @@ export async function updateFeedback(formData: FormData) {
       console.error("피드백 업데이트 실패:", {
         error,
         code: errorCode,
-        message: errorMessage
+        message: errorMessage,
+        uid: decodedToken.uid
       });
 
       // 권한 관련 오류인 경우

@@ -57,47 +57,48 @@ export default function CampusDetail({ campus, posts }: CampusDetailProps) {
     }, 1000)
   }
 
-  const handleFeedbackSave = async (feedback: string) => {
-    if (!selectedPost) return
+  const handleFeedbackSave = async (postId: string, feedback: string) => {
+    if (!user) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
 
-    setFeedbackSubmitting(true)
-
-    const formData = new FormData()
-    formData.append("id", selectedPost.id)
-    formData.append("feedback", feedback)
-    formData.append("campusId", campus.id)
-
+    setFeedbackSubmitting(true);
     try {
       console.log("피드백 저장 시도:", { 
-        postId: selectedPost.id, 
-        campusId: campus.id,
-        feedbackLength: feedback.length 
+        postId, 
+        campusId: campus.id, 
+        feedbackLength: feedback.length,
+        uid: user.uid 
       });
 
-      const result = await updateFeedback(formData)
+      // 현재 사용자의 ID 토큰 가져오기
+      const idToken = await user.getIdToken();
+      
+      const formData = new FormData();
+      formData.append("id", postId);
+      formData.append("feedback", feedback);
+      formData.append("campusId", campus.id);
+      formData.append("authToken", idToken);
 
+      const result = await updateFeedback(formData);
+      
       if (result.error) {
         console.error("피드백 저장 실패:", result.error);
-        // 오류 메시지를 더 명확하게 표시
         alert(result.error);
-      } else {
-        console.log("피드백 저장 성공");
-        setFeedbackModalOpen(false);
-        // 성공 메시지 표시
-        alert("피드백이 성공적으로 저장되었습니다.");
+        return;
       }
+
+      alert("피드백이 저장되었습니다.");
+      // 피드백 모달 닫기
+      setSelectedPost(null);
     } catch (error) {
-      // 예상치 못한 오류 처리
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error("피드백 저장 중 예상치 못한 오류:", {
-        error,
-        message: errorMessage
-      });
-      alert(`피드백 저장 중 오류가 발생했습니다: ${errorMessage}`);
+      console.error("피드백 저장 중 오류 발생:", error);
+      alert(error instanceof Error ? error.message : "피드백 저장 중 오류가 발생했습니다.");
     } finally {
       setFeedbackSubmitting(false);
     }
-  }
+  };
 
   // 날짜 포맷팅 함수
   const formatDate = (timestamp: any) => {
@@ -364,7 +365,7 @@ export default function CampusDetail({ campus, posts }: CampusDetailProps) {
           isAdmin={isAdmin}
           isSubmitting={feedbackSubmitting}
           onClose={() => setFeedbackModalOpen(false)}
-          onSave={handleFeedbackSave}
+          onSave={(feedback) => handleFeedbackSave(selectedPost!.id, feedback)}
         />
       )}
 
