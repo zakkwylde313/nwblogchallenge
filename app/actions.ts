@@ -165,6 +165,14 @@ export async function updateFeedback(formData: FormData) {
     const campusId = formData.get("campusId") as string
     const authToken = formData.get("authToken") as string
 
+    console.log("피드백 업데이트 요청 시작:", {
+      hasId: !!id,
+      hasFeedback: !!feedback,
+      hasCampusId: !!campusId,
+      hasAuthToken: !!authToken,
+      tokenLength: authToken?.length
+    });
+
     if (!id) {
       throw new Error("포스트 ID가 필요합니다.")
     }
@@ -180,10 +188,21 @@ export async function updateFeedback(formData: FormData) {
     // 인증 토큰 검증
     let decodedToken;
     try {
+      console.log("토큰 검증 시도:", { tokenLength: authToken.length });
       decodedToken = await adminAuth.verifyIdToken(authToken);
-      console.log("인증 토큰 검증 성공:", { uid: decodedToken.uid });
+      console.log("인증 토큰 검증 성공:", { 
+        uid: decodedToken.uid,
+        email: decodedToken.email,
+        admin: decodedToken.admin,
+        customClaims: decodedToken.custom_claims
+      });
     } catch (authError) {
-      console.error("인증 토큰 검증 실패:", authError);
+      console.error("인증 토큰 검증 실패:", {
+        error: authError,
+        code: (authError as any)?.code,
+        message: (authError as any)?.message,
+        stack: (authError as any)?.stack
+      });
       throw new Error("인증이 유효하지 않습니다. 다시 로그인해주세요.");
     }
 
@@ -192,7 +211,11 @@ export async function updateFeedback(formData: FormData) {
     
     // 관리자 권한 확인
     if (!adminUids.includes(decodedToken.uid)) {
-      console.error("관리자 권한 없음:", { uid: decodedToken.uid });
+      console.error("관리자 권한 없음:", { 
+        uid: decodedToken.uid,
+        email: decodedToken.email,
+        adminUids 
+      });
       throw new Error("관리자 권한이 필요합니다.");
     }
 
@@ -200,7 +223,8 @@ export async function updateFeedback(formData: FormData) {
       id, 
       campusId, 
       feedbackLength: feedback?.length,
-      uid: decodedToken.uid 
+      uid: decodedToken.uid,
+      email: decodedToken.email
     });
 
     try {
